@@ -55,8 +55,8 @@
             <a class="action" href="{{ url_for('download_vcf', slug=slug) }}">
               <span class="icon download"></span><span>Descargar</span>
             </a>
-            <a class="action" href="{{ person.web or '#' }}" target="_blank" rel="noopener">
-              <span class="icon web"></span> Página Web
+            <a class="action web-link" href="{{ person.web or '#' }}" target="_blank" rel="noopener">
+              <span class="icon web"></span><span>Página Web</span>
             </a>
             <a class="action" href="https://www.google.com/maps/search/?api=1&query={{ person.direccion | urlencode }}" target="_blank" rel="noopener">
               <span class="icon map"></span><span>Dirección</span>

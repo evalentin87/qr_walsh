@@ -118,12 +118,13 @@ body {
 }
 
 .grid-icons {
-  margin: 30px auto 0;
+  margin: 30px 0 0 -6px; /* arriba 30, derecha 0, abajo 0, izquierda 20 */
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   max-width: 320px;
   align-items: center;
+  justify-content: start; /* asegura que quede a la izquierda */
 }
 
 .grid-icons.big .icon {
@@ -132,7 +133,7 @@ body {
 }
 
 .grid-icons.with-labels .action {
-  gap: 10px;
+  gap: 5px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -145,6 +146,19 @@ body {
   cursor: pointer;
   text-decoration: none;
   color: #0f172a;
+  /* 👇 Nuevo */
+.grid-icons.with-labels .action span {
+  white-space: nowrap;
+
+
+/* Solo al botón Página Web */
+.web-link span {
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+
+}
 }
 
 .action .icon {
@@ -159,7 +173,7 @@ body {
 
 .action span:last-child {
   font-size: 16px;
-  font-weight: 400;   /* Cambié 700 → 400 (normal) */
+  font-weight: 700;   /* Cambié 700 → 400 (normal) */
   white-space: nowrap; /* Esto obliga a que no se corte en dos líneas */
 }
 
