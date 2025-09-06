@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crear Tarjeta / QR</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
+</head><body>
+<header class="topbar"><div class="brand"><img src="{{ url_for('serve_logo') }}" class="brand-logo">Walsh Perú</div><a class="btn secondary" href="{{ url_for('index') }}">Inicio</a></header>
+<main class="container">
+  <div class="two-col">
+    <section>
+      <h2>Ingreso Manual</h2>
+      <form method="post" action="{{ url_for('create_manual') }}" enctype="multipart/form-data" class="form-grid">
+        <label>Nombre<input name="nombre" required></label>
+        <label>Apellido<input name="apellido" required></label>
+        <label>Cargo<input name="cargo"></label>
+        <label>Área<input name="area"></label>
+        <label>Correo<input name="correo" type="email"></label>
+        <label>Celular<input name="celular"></label>
+        <label class="wide">Dirección<input name="direccion"></label>
+        <label class="wide">Página Web<input name="web" value="https://www.walshp.com.pe/"></label>
+        <label class="wide">Foto (URL o ruta)<input name="foto" placeholder="https://... o C:\\carpeta\\foto.jpg"></label>
+        <label class="wide">Foto (archivo)<input type="file" name="foto_archivo" accept="image/*"></label>
+        <div class="actions"><button class="btn" type="submit">Crear tarjeta y QR</button></div>
+      </form>
+    </section>
+    <section>
+      <h2>Masivo desde Excel (.xlsx)</h2>
+      <p class="muted">Encabezados: <code>nombre, apellido, cargo, area, correo, celular, direccion, web, foto</code></p>
+      <form method="post" action="{{ url_for('create_bulk') }}" enctype="multipart/form-data">
+        <input type="file" name="xlsx" accept=".xlsx" required>
+        <button class="btn" type="submit">Crear QR de forma masiva</button>
+      </form>
+    </section>
+  </div>
+</main>
+</body></html>

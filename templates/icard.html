@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <!-- Evitamos zoom automático y barras -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>{{ person.nombre }} {{ person.apellido }}</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <!-- Quitamos container, topbar, etc -->
+  <style>
+    .topbar, .qr-pane, .downloads { display: none !important }
+    body { margin:0; }
+  </style>
+</head>
+<body class="icard">
+  <div class="icard-stage">
+    <div class="scale-wrap">
+      <div class="phone">
+        
+        <!-- Header -->
+        <div class="header-wave">
+          <img class="logo" src="{{ url_for('serve_logo') }}" alt="Logo">
+          
+          <!-- Foto -->
+          <div class="avatar-wrap">
+            {% if person.foto_local %}
+              <img src="{{ url_for('photo', slug=slug) }}" alt="Foto">
+            {% elif person.foto %}
+              <img src="{{ person.foto }}" alt="Foto">
+            {% else %}
+              <img src="{{ url_for('static', filename='img/avatar_placeholder.png') }}" alt="Foto">
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Contenido -->
+        <div class="content">
+          <h1 class="fullname">{{ person.nombre }} <strong>{{ person.apellido }}</strong></h1>
+          <div class="divider"></div>
+          <div class="role">{{ person.cargo }}</div>
+
+          <div class="grid-icons big with-labels">
+            <a class="action" href="tel:{{ person.celular }}">
+              <span class="icon phone"></span><span>Llamar</span>
+            </a>
+            <a class="action" href="mailto:{{ person.correo }}">
+              <span class="icon mail"></span><span>Correo</span>
+            </a>
+            <a class="action" href="https://wa.me/{{ person.celular | replace('+','') | replace(' ','') }}">
+              <span class="icon wa"></span><span>WhatsApp</span>
+            </a>
+            <a class="action" href="{{ url_for('download_vcf', slug=slug) }}">
+              <span class="icon download"></span><span>Descargar</span>
+            </a>
+            <a class="action" href="{{ person.web or '#' }}" target="_blank" rel="noopener">
+              <span class="icon web"></span><span>Página Web</span>
+            </a>
+            <a class="action" href="https://www.google.com/maps/search/?api=1&query={{ person.direccion | urlencode }}" target="_blank" rel="noopener">
+              <span class="icon map"></span><span>Dirección</span>
+            </a>
+          </div>
+        </div>
+
+
+
+
+        <script>
+  function fit() {
+    const w = 360, h = 720; // tamaño base reducido
+    const wrap = document.getElementById('scaleWrap');
+    const s = Math.min(window.innerWidth / w, window.innerHeight / h);
+    wrap.style.setProperty('--scale', s);
+  }
+  window.addEventListener('resize', fit);
+  window.addEventListener('orientationchange', fit);
+  fit();
+</script>
+
+
+        <!-- Créditos -->
+        <div class="credits right">
+          Hecho por Edwin Valentin - Analista de tecnología
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

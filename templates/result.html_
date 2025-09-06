@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultado – {{ person.nombre }} {{ person.apellido }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
+</head><body>
+<header class="topbar"><h2>Tarjeta generada: {{ person.nombre }} {{ person.apellido }}</h2></header>
+<main class="container">
+  <div class="layout-two">
+    <iframe class="card-frame" src="{{ url_for('card_view', slug=slug) }}" title="Vista tarjeta"></iframe>
+    <aside class="qr-pane">
+      <div class="qr-card">
+        <img src="{{ qr_url }}" alt="QR">
+        <p>QR individual para: <strong>{{ person.nombre }} {{ person.apellido }}</strong></p>
+        <div class="qr-actions">
+          <a class="btn" href="{{ url_for('icard', slug=slug) }}" target="_blank">Ver tarjeta digital</a>
+          <a class="btn secondary" href="{{ qr_url }}">Descargar QR</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+</body></html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR • {{ person.nombre }} {{ person.apellido }}</title>
+  <style>
+    :root{--green:#007E72}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;background:#f3f4f6;color:#0f172a}
+    .wrap{max-width:1100px;margin:0 auto;padding:26px 16px}
+    h1{font-size:22px;font-weight:800;margin:0 0 18px}
+    .qr-pane{display:flex;justify-content:center;align-items:flex-start}
+    .card{background:#fff;border-radius:18px;padding:26px;box-shadow:0 10px 30px rgba(0,0,0,.08);text-align:center}
+    .card h2{margin:0 0 12px;font-size:16px;font-weight:700;color:#6b7280}
+    .qrbox{display:flex;justify-content:center}
+    .qrbox img{width:min(88vw,420px);height:min(88vw,420px);object-fit:contain;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+    .actions{margin-top:14px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .btn{display:inline-block;background:var(--green);color:#fff;text-decoration:none;font-weight:700;border:0;border-radius:10px;padding:10px 16px;cursor:pointer}
+    .btn.secondary{background:#0f172a}
+    /* No hay columna izquierda: aseguramos 100% del ancho para el QR */
+  </style>
+</head>
+<body>
+  {% set safe_slug = (slug or (person.nombre ~ '_' ~ person.apellido)).replace(' ', '_') %}
+  {% set default_qr = url_for('static', filename='qrs/' + safe_slug + '.png') %}
+  {% set img_qr = qr_url or default_qr %}
+
+  <main class="wrap">
+    <h1>Tarjeta generada: {{ person.nombre }} {{ person.apellido }}</h1>
+
+    <section class="qr-pane">
+      <div class="card">
+        <div class="qrbox">
+          <img id="qrimg" src="{{ img_qr }}" alt="Código QR de {{ person.nombre }} {{ person.apellido }}">
+        </div>
+        <h2>QR individual para: <strong>{{ person.nombre }} {{ person.apellido }}</strong></h2>
+        <div class="actions">
+          <a class="btn" href="{{ url_for('icard', slug=safe_slug) }}">Ver tarjeta digital</a>
+          <a class="btn secondary" href="{{ url_for('download_qr', slug=safe_slug) }}">Descargar QR</a>
+        </div>
+        <div id="warn" style="display:none;color:#9b1c1c;font-weight:600;margin-top:10px">
+          No se encontró la imagen del QR. Debe existir en <code>static/qrs/{{ safe_slug }}.png</code>,
+          o pasa <code>qr_url</code> al template.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Aviso si la imagen del QR no carga.
+    const img = document.getElementById('qrimg');
+    img.onerror = () => document.getElementById('warn').style.display = 'block';
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Valentin;Edwin;;;
+FN:Edwin Valentin
+ORG:Walsh Perú;Tecnología
+TITLE:Consultor de tecnología
+TEL;TYPE=CELL,VOICE:952267398
+EMAIL;TYPE=INTERNET,PREF:evalentin@walshp.com.pe
+ADR;TYPE=WORK:;;Calle Alexander Fleming 187, Urb. Higuereta Santiago de Surco, Lima, Perú;;;;
+URL:https://www.walshp.com.pe/
+PHOTO;VALUE=URI:http://192.168.18.57:5000/photo/Edwin_Valentin
+END:VCARD
