@@ -159,7 +159,8 @@ body {
 
 .action span:last-child {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 400;   /* Cambié 700 → 400 (normal) */
+  white-space: nowrap; /* Esto obliga a que no se corte en dos líneas */
 }
 
 .icon::before {

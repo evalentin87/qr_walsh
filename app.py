@@ -250,7 +250,7 @@ def photo(slug):
 
 @app.get("/logo.png")
 def serve_logo():
-    return send_from_directory(os.path.join(STATIC_DIR, "img"), "Logo.png")
+    return send_from_directory(os.path.join(STATIC_DIR, "img"), "logo.png")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
