@@ -89,7 +89,9 @@ body {
 .avatar-wrap img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover;         /* mantiene el círculo lleno */
+  object-position: 60% 30%;  /* X = 50% (centro horizontal), Y = 20% (ligeramente arriba) */
+  border-radius: 50%;
 }
 
 .content {
