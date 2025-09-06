@@ -79,9 +79,12 @@ def _clean(s):
 
 def _phone_e164(s):
     s = str(s or "")
-    keep_plus = s.strip().startswith("+")
     digits = re.sub(r"\D+", "", s)
-    return ("+" if keep_plus else "") + digits
+    # Si ya empieza con +, se devuelve tal cual
+    if s.strip().startswith("+"):
+        return "+" + digits
+    # Si no tiene prefijo, agregamos +51 (Perú por defecto)
+    return "+51" + digits
 
 def _build_vcard(p, slug=None, org_name="Walsh Perú"):
     """Devuelve la vCard 3.0 con CRLF obligatorio."""
