@@ -5,8 +5,8 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
 </head><body class="center">
   <div class="welcome">
-    <img class="hero-logo" src="{{ url_for('serve_logo') }}" alt="Logo">
+    <img class="hero-logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
     <h1>Bienvenido al generador de tarjetas de presentación de QR de Walsh Perú</h1>
     <a class="btn" href="{{ url_for('form_view') }}">Ingresar al sistema</a>
-  </div>
+</div>
 </body></html>
