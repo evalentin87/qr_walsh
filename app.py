@@ -5,6 +5,7 @@ import qrcode
 from PIL import Image
 import openpyxl
 import requests
+import base64
 import os
 
 # Si NO hay variables de entorno, usará las carpetas locales (funciona igual en Windows)
@@ -117,12 +118,15 @@ def _build_vcard(p, slug=None, org_name="Walsh Perú"):
     # Foto por URL (opcional)
     try:
         if p.get("foto_local") and slug:
-            abs_photo = request.url_root.rstrip("/") + url_for("photo", slug=slug)
-            lines.append(f"PHOTO;VALUE=URI:{abs_photo}")
+            with open(photo_path(slug), "rb") as f:
+                b64_photo = base64.b64encode(f.read()).decode("utf-8")
+            lines.append("PHOTO;ENCODING=b;TYPE=JPEG:" + b64_photo)
         elif p.get("foto"):
+            # Si es URL externa, la dejamos como URI
             lines.append(f"PHOTO;VALUE=URI:{_clean(p.get('foto'))}")
     except Exception:
         pass
+
 
     lines.append("END:VCARD")
     return "\r\n".join(lines) + "\r\n"
