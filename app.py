@@ -6,19 +6,30 @@ from PIL import Image
 import openpyxl
 import requests
 import base64
-import os
 
-# Si NO hay variables de entorno, usará las carpetas locales (funciona igual en Windows)
-BASE_DIR   = os.environ.get("QR_BASE_DIR", os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR   = os.environ.get("QR_DATA_DIR",   os.path.join(BASE_DIR, "data"))
-PHOTOS_DIR = os.environ.get("QR_PHOTOS_DIR", os.path.join(BASE_DIR, "photos"))
-QRS_DIR    = os.environ.get("QR_QRS_DIR",    os.path.join(BASE_DIR, "qrs"))
-VCF_DIR    = os.environ.get("QR_VCF_DIR",    os.path.join(BASE_DIR, "vcards"))
+# ============================
+# CONFIGURACIÓN DE RUTAS
+# ============================
+
+# Ruta base local (solo para desarrollo en tu PC)
+BASE_DIR = os.environ.get("QR_BASE_DIR", os.path.dirname(os.path.abspath(__file__)))
+
+# Ruta persistente en Azure (montada en /datoswalsh)
+PERSISTENT_DIR = os.environ.get("QR_PERSISTENT_DIR", "/datoswalsh")
+
+DATA_DIR   = os.path.join(PERSISTENT_DIR, "data")
+PHOTOS_DIR = os.path.join(PERSISTENT_DIR, "photos")
+QRS_DIR    = os.path.join(PERSISTENT_DIR, "qrs")
+VCF_DIR    = os.path.join(PERSISTENT_DIR, "vcards")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
+# Crear las carpetas si no existen
 for p in [DATA_DIR, PHOTOS_DIR, QRS_DIR, VCF_DIR]:
     os.makedirs(p, exist_ok=True)
 
+# ============================
+# INICIO APP
+# ============================
 app = Flask(__name__)
 
 def slugify(s: str) -> str:
@@ -50,18 +61,14 @@ def load_json(slug):
         return json.load(f)
 
 def store_photo(slug, foto_url_or_path, file_storage):
-    # Uploaded file
     if file_storage and getattr(file_storage, "filename", ""):
         file_storage.save(photo_path(slug))
         return True
-    # Local absolute
     if foto_url_or_path and os.path.isabs(foto_url_or_path) and os.path.exists(foto_url_or_path):
         shutil.copy(foto_url_or_path, photo_path(slug))
         return True
-    # Remote URL
     if foto_url_or_path and foto_url_or_path.lower().startswith(("http://", "https://")):
         try:
-            import requests
             r = requests.get(foto_url_or_path, timeout=10)
             if r.status_code == 200:
                 with open(photo_path(slug), "wb") as f:
@@ -72,7 +79,7 @@ def store_photo(slug, foto_url_or_path, file_storage):
     return False
 
 # ---------------------------
-# Helpers para vCard (NUEVO)
+# Helpers para vCard
 # ---------------------------
 def _clean(s):
     return (s or "").strip()
@@ -80,14 +87,11 @@ def _clean(s):
 def _phone_e164(s):
     s = str(s or "")
     digits = re.sub(r"\D+", "", s)
-    # Si ya empieza con +, se devuelve tal cual
     if s.strip().startswith("+"):
         return "+" + digits
-    # Si no tiene prefijo, agregamos +51 (Perú por defecto)
     return "+51" + digits
 
 def _build_vcard(p, slug=None, org_name="Walsh Perú"):
-    """Devuelve la vCard 3.0 con CRLF obligatorio."""
     nombre = _clean(p.get("nombre"))
     apellido = _clean(p.get("apellido"))
     cargo = _clean(p.get("cargo"))
@@ -103,39 +107,32 @@ def _build_vcard(p, slug=None, org_name="Walsh Perú"):
         f"N:{apellido};{nombre};;;",
         f"FN:{nombre} {apellido}",
     ]
-    # ORG/TITLE si existen
     if org_name or area:
         lines.append(f"ORG:{org_name};{area}")
     if cargo:
         lines.append(f"TITLE:{cargo}")
-    # Teléfono y correo
     if celular:
         lines.append(f"TEL;TYPE=CELL,VOICE:{celular}")
     if correo:
         lines.append(f"EMAIL;TYPE=INTERNET,PREF:{correo}")
-    # Dirección y Web
     if direccion:
         lines.append(f"ADR;TYPE=WORK:;;{direccion};;;;")
     if web:
         lines.append(f"URL:{web}")
-    # Foto por URL (opcional)
     try:
         if p.get("foto_local") and slug:
             with open(photo_path(slug), "rb") as f:
                 b64_photo = base64.b64encode(f.read()).decode("utf-8")
             lines.append("PHOTO;ENCODING=b;TYPE=JPEG:" + b64_photo)
         elif p.get("foto"):
-            # Si es URL externa, la dejamos como URI
             lines.append(f"PHOTO;VALUE=URI:{_clean(p.get('foto'))}")
     except Exception:
         pass
-
 
     lines.append("END:VCARD")
     return "\r\n".join(lines) + "\r\n"
 
 def make_vcard(slug, p):
-    """Escribe el .vcf en disco (útil si luego quieres empaquetar)."""
     vcf_text = _build_vcard(p, slug)
     with open(vcf_path(slug), "wb") as f:
         f.write(vcf_text.encode("utf-8"))
@@ -163,7 +160,6 @@ def build_person_from_form(form):
 def create_manual():
     p = build_person_from_form(request.form)
     slug = slugify(f"{p.get('nombre','')}_{p.get('apellido','')}") or "tarjeta"
-    # Photo
     store_photo(slug, p.get("foto"), request.files.get("foto_archivo"))
     if os.path.exists(photo_path(slug)):
         p["foto_local"] = True
@@ -179,7 +175,6 @@ def create_bulk():
     tmp = os.path.join(DATA_DIR, "_bulk.xlsx")
     f.save(tmp)
 
-    import openpyxl
     wb = openpyxl.load_workbook(tmp)
     ws = wb.active
     headers = [ (c or "").strip().lower() for c in next(ws.iter_rows(min_row=1, max_row=1, values_only=True)) ]
@@ -230,7 +225,6 @@ def download_qr(slug):
     if not os.path.exists(path): abort(404)
     return send_from_directory(QRS_DIR, f"{slug}.png", as_attachment=True)
 
-# ------------ DESCARGA VCF (NUEVO) ------------
 @app.get("/download_vcf/<slug>")
 def download_vcf(slug):
     p = load_json(slug)
@@ -243,7 +237,6 @@ def download_vcf(slug):
         "X-Content-Type-Options": "nosniff",
     }
     return Response(vcf_text.encode("utf-8"), headers=headers)
-# ----------------------------------------------
 
 @app.get("/photo/<slug>")
 def photo(slug):
